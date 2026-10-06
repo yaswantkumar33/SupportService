@@ -1,0 +1,78 @@
+# -------------------------
+# Node.js
+# -------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+.pnpm-debug.log
+
+# Build output
+dist/
+build/
+.cache/
+.temp/
+.tmp/
+
+# TypeScript
+*.tsbuildinfo
+
+# -------------------------
+# Environment & Config
+# -------------------------
+.env
+.env.*
+!.env.example   # Keep example env file for reference
+*.local
+
+# -------------------------
+# Logs
+# -------------------------
+logs
+*.log
+*.log.*
+log/
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# -------------------------
+# OS / Editor files
+# -------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# -------------------------
+# PostgreSQL
+# -------------------------
+*.sql
+*.dump
+*.backup
+pgdata/
+postgres-data/
+db-data/
+
+# -------------------------
+# Drizzle ORM
+# -------------------------
+# Generated migration files (if you don't want to commit them)
+# Uncomment if you generate migrations locally and not in repo
+# drizzle/migrations/
+
+# Drizzle cache/build artifacts
+drizzle/cache/
+drizzle/*.sqlite
+drizzle/*.db
+
+# -------------------------
+# Misc
+# -------------------------
+coverage/
+.nyc_output/
