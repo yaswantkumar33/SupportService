@@ -1,4 +1,4 @@
-import { table } from "console";
+import { relations } from "drizzle-orm";
 import {
   pgTable,
   uuid,
@@ -8,9 +8,6 @@ import {
   pgEnum,
   index,
 } from "drizzle-orm/pg-core";
-import { string } from "zod";
-import { describe } from "zod/v4/core";
-
 // Enuma we are used in users and tickets db
 export const roleEnum = pgEnum("role", ["customer", "agent", "admin"]);
 export const statusEnum = pgEnum("status", [
@@ -48,7 +45,7 @@ export const tickets = pgTable(
     customerId: uuid("customer_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    aassignedAgentId: uuid("assigned_agent_id").references(() => users.id, {
+    assignedAgentId: uuid("assigned_agent_id").references(() => users.id, {
       onDelete: "set null",
     }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -60,3 +57,23 @@ export const tickets = pgTable(
     index("idx_tickets_status").on(table.status),
   ],
 );
+
+// declaring the drizzlee relationships here at the schema
+
+export const userRelations = relations(users, ({ many }) => ({
+  tickets: many(tickets, { relationName: "customerTickets" }),
+  assignedTickets: many(tickets, { relationName: "agentTickets" }),
+}));
+
+export const ticketRealtions = relations(tickets, ({ one }) => ({
+  customer: one(users, {
+    fields: [tickets.customerId],
+    references: [users.id],
+    relationName: "customerTickets",
+  }),
+  assignedAgent: one(users, {
+    fields: [tickets.assignedAgentId],
+    references: [users.id],
+    relationName: "agentTickets",
+  }),
+}));

@@ -1,4 +1,3 @@
-import { input } from "zod";
 import { db } from "../../db";
 import { users } from "../../db/schema";
 import { CreateUserInput } from "./users.schema";

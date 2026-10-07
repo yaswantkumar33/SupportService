@@ -1,8 +1,6 @@
 import { Request, Response } from "express";
 import { createUserSchema } from "./users.schema";
 import * as userService from "./users.service";
-import { success } from "zod";
-import { error } from "node:console";
 
 export const createUserHandeler = async (req: Request, res: Response) => {
   try {
