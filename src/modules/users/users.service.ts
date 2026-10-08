@@ -17,3 +17,17 @@ export const createUser = async (input: CreateUserInput) => {
 export const getAllUsers = async () => {
   return await db.select().from(users);
 };
+
+export const getUsersWithTicketes = async () => {
+  return await db.query.users.findMany({
+    with: {
+      tickets: {
+        columns: {
+          title: true,
+          priority: true,
+          assignedAgentId: true,
+        },
+      },
+    },
+  });
+};

@@ -23,3 +23,12 @@ export const getUsersHandler = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: e.message });
   }
 };
+
+export const getUsersWithTickets = async (req: Request, res: Response) => {
+  try {
+    const usersListWithTicket = await userService.getUsersWithTicketes();
+    res.status(200).json({ success: true, data: usersListWithTicket });
+  } catch (e: any) {
+    res.status(500).json({ success: false, message: e.message });
+  }
+};
