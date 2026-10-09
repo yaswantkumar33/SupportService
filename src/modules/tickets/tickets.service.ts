@@ -3,6 +3,7 @@ import { db } from "../../db";
 import { tickets, users } from "../../db/schema";
 import { createTicketInput } from "./tickets.schema";
 import { eq } from "drizzle-orm";
+import { AppErr } from "../../shared/errors/app-error";
 
 export const createTicket = async (input: createTicketInput) => {
   // 1.need to validate the customer is there or not
@@ -11,7 +12,7 @@ export const createTicket = async (input: createTicketInput) => {
   });
 
   if (!customerExists)
-    throw new Error("Customer Not found to create the ticket!");
+    throw new AppErr("Customer Not found to create the ticket!");
 
   // 2.insert the ticket into the ticket table
 
