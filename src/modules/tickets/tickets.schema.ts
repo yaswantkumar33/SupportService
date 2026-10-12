@@ -8,4 +8,13 @@ export const createTicketSchema = z.object({
   assignedAgentId: z.string().uuid().optional(),
 });
 
+export const updateTicketSchema = z.object({
+  title: z.string().min(3).optional(),
+  description: z.string().min(5).optional(),
+  status: z.enum(["open", "in_progress", "resolved", "closed"]).optional(),
+  priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
+  assignedAgentId: z.string().min(3).optional(),
+});
+
 export type createTicketInput = z.infer<typeof createTicketSchema>;
+export type updateTicketInput = z.infer<typeof updateTicketSchema>;
