@@ -31,3 +31,15 @@ export const getUsersWithTickets = async (req: Request, res: Response, next: Nex
 
   }
 };
+
+export const deleteUser = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+
+  try {
+    const delectedUser = await userService.deleteUser(req.params.id);
+    res.status(200).json({
+      success: true,
+      data: delectedUser
+    })
+  } catch (e: any) { next(e) }
+
+}

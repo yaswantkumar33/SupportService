@@ -1,8 +1,9 @@
 import { db } from "../../db";
 import { tickets, users } from "../../db/schema";
-import { createTicketInput, updateTicketInput } from "./tickets.schema";
-import { eq } from "drizzle-orm";
+import { createTicketInput, getTicketsQueryInput, updateTicketInput } from "./tickets.schema";
+import { eq, and } from "drizzle-orm";
 import { AppErr } from "../../shared/errors/app-error";
+
 
 export const createTicket = async (input: createTicketInput) => {
   // 1.need to validate the customer is there or not
@@ -19,8 +20,9 @@ export const createTicket = async (input: createTicketInput) => {
   return ticketAdded;
 };
 
-export const updateTicket = async (ticketId: string, input: updateTicketInput) => {
 
+
+export const updateTicket = async (ticketId: string, input: updateTicketInput) => {
 
   const ticketExists = await db.query.tickets.findFirst({
     where: eq(tickets.id, ticketId)
@@ -47,8 +49,21 @@ export const updateTicket = async (ticketId: string, input: updateTicketInput) =
   return updatedTicket;
 }
 
-export const getAllTicket = async () => {
+
+
+export const getAllTicket = async (query: getTicketsQueryInput) => {
+
+  const { status, priority, page, limit } = query;
+  const offset = (page - 1) * limit;
+
+  let queryConditions = [];
+  if (status) queryConditions.push(eq(tickets.status, status));
+  if (priority) queryConditions.push(eq(tickets.priority, priority));
+
   return await db.query.tickets.findMany({
+    where: queryConditions.length > 0 ? and(...queryConditions) : undefined,
+    limit: limit,
+    offset: offset,
     with: {
       customer: {
         columns: {
@@ -57,6 +72,13 @@ export const getAllTicket = async () => {
           email: true,
         },
       },
+      assignedAgent: {
+        columns: {
+          id: true,
+          name: true,
+          email: true,
+        }
+      }
     },
   });
 };
