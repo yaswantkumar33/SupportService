@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { createTicketSchema, updateTicketSchema } from "./tickets.schema";
+import { createTicketSchema, getTicketsQuerySchema, updateTicketSchema } from "./tickets.schema";
 import * as ticketService from "./tickets.service";
 
 export const createTicketHandeler = async (req: Request, res: Response, next: NextFunction) => {
@@ -18,7 +18,9 @@ export const createTicketHandeler = async (req: Request, res: Response, next: Ne
 
 export const getTicketsHandeler = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const ticketsList = await ticketService.getAllTicket();
+
+    const query = getTicketsQuerySchema.parse(req.query);
+    const ticketsList = await ticketService.getAllTicket(query);
     res.status(200).json({ success: true, data: ticketsList });
   } catch (e: any) {
     next(e);
