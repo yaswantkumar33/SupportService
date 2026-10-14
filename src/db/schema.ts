@@ -33,6 +33,7 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
 // Ticket table
 export const tickets = pgTable(
   "tickets",
@@ -58,8 +59,20 @@ export const tickets = pgTable(
   ],
 );
 
-// declaring the drizzlee relationships here at the schema
+export const ticketComments = pgTable("ticket_comments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  ticketId: uuid("ticket_id")
+    .notNull()
+    .references(() => tickets.id, { onDelete: "cascade" }),
+  authorId: uuid("author_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
 
+// declaring the drizzlee relationships here at the schema
 export const userRelations = relations(users, ({ many }) => ({
   tickets: many(tickets, { relationName: "customerTickets" }),
   assignedTickets: many(tickets, { relationName: "agentTickets" }),
@@ -75,5 +88,16 @@ export const ticketRealtions = relations(tickets, ({ one }) => ({
     fields: [tickets.assignedAgentId],
     references: [users.id],
     relationName: "agentTickets",
+  }),
+}));
+
+export const ticketCommentsRelations = relations(ticketComments, ({ one }) => ({
+  ticket: one(tickets, {
+    fields: [ticketComments.ticketId],
+    references: [tickets.id],
+  }),
+  author: one(users, {
+    fields: [ticketComments.authorId],
+    references: [users.id],
   }),
 }));

@@ -69,3 +69,18 @@
   - Verified live database behavior in `dev_support_db`: deleting a customer user automatically purged their associated tickets (`ON DELETE CASCADE`).
 - **Ticket Comments Schema Design:**
   - Defined `ticketComments` table schema and Drizzle relations (`ticketCommentsRelations`) in `src/db/schema.ts`.
+
+---
+
+## 5. Ticket Comments Sub-resource Module (Oct 14, 2026)
+
+- **Database Schema & Relations:**
+  - Created `ticket_comments` table in PostgreSQL (`dev_support_db`) using `npx drizzle-kit push`.
+  - Configured foreign key rules (`ON DELETE CASCADE`) linking comments to tickets and author users.
+  - Established Drizzle ORM relational definitions (`ticketCommentsRelations` & updated `ticketsRelations`).
+- **Comments Module (`src/modules/comments/`):**
+  - Built `createCommentSchema` using Zod for validation.
+  - Implemented `createComment` service method verifying ticket and author existence.
+  - Implemented `getTicketComments` service method returning chronological comment threads (`asc` by `createdAt`) with embedded author metadata (`id`, `name`, `email`, `role`).
+- **API Routing:**
+  - Mounted comment sub-routes under tickets router (`src/modules/tickets/tickets.router.ts`): `POST /api/tickets/:id/comments` and `GET /api/tickets/:id/comments`.
