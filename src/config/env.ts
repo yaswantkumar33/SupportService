@@ -12,8 +12,9 @@ const envSchema = z.object({
     .enum(["development", "production", "test"])
     .default("development"),
   DATABASE_URL: z
-    .string()
     .url("Database Url Must be a valid postgresql database string"),
+  JWT_SECRET: z.string().min(1),
+  JWT_EXPIRES_IN: z.string().default("1d"),
 });
 
 export const env = envSchema.parse(process.env);
