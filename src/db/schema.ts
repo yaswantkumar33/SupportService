@@ -28,6 +28,7 @@ export const priorityEnum = pgEnum("priority", [
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: varchar("email", { length: 225 }).notNull().unique(),
+  password: text('password').notNull(),
   name: varchar("name", { length: 255 }).notNull(),
   role: roleEnum("role").default("customer").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -58,7 +59,7 @@ export const tickets = pgTable(
     index("idx_tickets_status").on(table.status),
   ],
 );
-
+// ticket commnets  table
 export const ticketComments = pgTable("ticket_comments", {
   id: uuid("id").defaultRandom().primaryKey(),
   ticketId: uuid("ticket_id")
