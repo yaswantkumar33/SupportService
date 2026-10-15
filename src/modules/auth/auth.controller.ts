@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { registerSchema } from "./auth.schema";
+import { loginSchema, registerSchema } from "./auth.schema";
 import * as authService from "./auth.service";
 
 export const registerHandeler = async (req: Request, res: Response, next: NextFunction) => {
@@ -18,9 +18,17 @@ export const registerHandeler = async (req: Request, res: Response, next: NextFu
 
 }
 
-// export const loginHandeler = async (req: Request, res: Response, next: NextFunction){
-//     try {
+export const loginHandeler = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const validatedData = loginSchema.parse(req.body)
+        const result = await authService.loginUser(validatedData)
+        console.log(result);
 
+        res.status(200).json({
+            success: true,
+            messgage: "Login sucessfull",
+            data: result
+        })
 
-//      } catch (e) { next(e) }
-// }
+    } catch (e) { next(e) }
+}

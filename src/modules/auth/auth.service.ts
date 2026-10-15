@@ -1,9 +1,11 @@
 import { db } from "../../db";
-import { registerInput } from "./auth.schema";
+import { loginInput, registerInput } from "./auth.schema";
 import { users } from "../../db/schema";
 import { eq } from "drizzle-orm";
 import { AppErr } from "../../shared/errors/app-error";
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { env } from "../../config/env";
 
 
 export const registerUser = async (input: registerInput) => {
@@ -29,4 +31,32 @@ export const registerUser = async (input: registerInput) => {
         createdAt: users.createdAt
     })
     return newUser;
+}
+
+
+export const loginUser = async (input: loginInput) => {
+
+    const userExists = await db.query.users.findFirst({
+        where: eq(users.email, input.email)
+    })
+    if (!userExists) throw new AppErr("Invalid email or password", 401)
+
+    const isPasswordValid = await bcrypt.compare(input.password, userExists.password);
+    if (!isPasswordValid) throw new AppErr("Invalid password", 401);
+
+    const token = jwt.sign(
+        { userId: userExists.id, userRole: userExists.role },
+        env.JWT_SECRET,
+        { expiresIn: env.JWT_EXPIRES_IN as any },
+    );
+
+    return {
+        user: {
+            id: userExists.id,
+            name: userExists.name,
+            email: userExists.email,
+            role: userExists.role,
+        },
+        token,
+    }
 }
