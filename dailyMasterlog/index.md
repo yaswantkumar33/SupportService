@@ -84,3 +84,12 @@
   - Implemented `getTicketComments` service method returning chronological comment threads (`asc` by `createdAt`) with embedded author metadata (`id`, `name`, `email`, `role`).
 - **API Routing:**
   - Mounted comment sub-routes under tickets router (`src/modules/tickets/tickets.router.ts`): `POST /api/tickets/:id/comments` and `GET /api/tickets/:id/comments`.
+
+## 6. Authentication & JWT Infrastructure (Oct 15, 2026)
+- **Password Security:** Added `password` column to `users` schema, integrated `bcryptjs` hashing (10 salt rounds) on registration, and sanitized user output schemas to prevent hash exposure.
+- **JWT Environment Config:** Added Zod schema validation for `JWT_SECRET` and `JWT_EXPIRES_IN` in `src/config/env.ts`.
+- **Auth Module (`src/modules/auth/`):**
+  - Created `registerSchema` and `loginSchema` in `auth.schema.ts`.
+  - Built `registerUser` service for encrypted user creation.
+  - Built `loginUser` service validating credentials via `bcrypt.compare` and issuing signed JWTs containing `userId` and `userRole` claims.
+  - Exposed `POST /api/auth/register` and `POST /api/auth/login` endpoints in `auth.router.ts`.
