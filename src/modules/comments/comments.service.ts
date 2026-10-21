@@ -19,9 +19,6 @@ export const createComment = async (ticketId: string, data: createCommentInput &
     })
     if (!userExists) throw new AppErr("Author Not Found!", 404)
 
-    console.log("all errors are passed");
-
-
     const [newComment] = await db.insert(ticketComments).values({
         ticketId, authorId: data.authorId, content: data.content
     }).returning()

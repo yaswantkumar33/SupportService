@@ -86,6 +86,7 @@
   - Mounted comment sub-routes under tickets router (`src/modules/tickets/tickets.router.ts`): `POST /api/tickets/:id/comments` and `GET /api/tickets/:id/comments`.
 
 ## 6. Authentication & JWT Infrastructure (Oct 15, 2026)
+
 - **Password Security:** Added `password` column to `users` schema, integrated `bcryptjs` hashing (10 salt rounds) on registration, and sanitized user output schemas to prevent hash exposure.
 - **JWT Environment Config:** Added Zod schema validation for `JWT_SECRET` and `JWT_EXPIRES_IN` in `src/config/env.ts`.
 - **Auth Module (`src/modules/auth/`):**
@@ -93,3 +94,17 @@
   - Built `registerUser` service for encrypted user creation.
   - Built `loginUser` service validating credentials via `bcrypt.compare` and issuing signed JWTs containing `userId` and `userRole` claims.
   - Exposed `POST /api/auth/register` and `POST /api/auth/login` endpoints in `auth.router.ts`.
+
+  ## 7. Middleware Security & Role-Based Access Control (Oct 21, 2026)
+
+- **Express Type Declaration (`src/types/express.d.ts`):** Extended `Express.Request` type definition to recognize `req.user` containing `userId` and `userRole`.
+- **Authentication Middleware (`src/shared/middlewares/auth.middleware.ts`):**
+  - Built `authenticate` middleware parsing `Authorization: Bearer <token>` headers.
+  - Decodes and verifies signed JWT payloads using `jwt.verify` and attaches `userId` and `userRole` to request context.
+- **Identity Injection & Anti-Spoofing Refactor:**
+  - Removed client-submitted identity fields (`customerId`, `authorId`) from Zod validation schemas across ticket and comment sub-resources.
+  - Dynamically bound `req.user!.userId` to service invocations across `POST /api/tickets` and `POST /api/tickets/:id/comments`.
+- **RBAC Middleware (`src/shared/middlewares/role.middleware.ts`):**
+  - Built `requireRole` middleware factory checking `req.user.userRole` against permitted route roles.
+  - Enforced `requireRole('agent', 'admin')` on `PATCH /api/tickets/:id`.
+  - Enforced `requireRole('admin')` on `DELETE /api/users/:id`.
