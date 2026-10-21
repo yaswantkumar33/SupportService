@@ -5,9 +5,11 @@ import * as ticketService from "./tickets.service";
 export const createTicketHandeler = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const validatedReqData = createTicketSchema.parse(req.body);
-    const ticket = await ticketService.createTicket(validatedReqData);
-    res.status(200).json({
+    const customerId = req.user!.userId;
+    const ticket = await ticketService.createTicket({ ...validatedReqData, customerId, });
+    res.status(201).json({
       success: true,
+      message: "Ticket Created Successfully",
       data: ticket,
     });
   } catch (e: any) {

@@ -5,7 +5,7 @@ import { createCommentInput } from "./comments.schema";
 import { tickets, ticketComments, users } from './../../db/schema';
 
 
-export const createComment = async (ticketId: string, data: createCommentInput) => {
+export const createComment = async (ticketId: string, data: createCommentInput & { authorId: string }) => {
 
     // check if the ticket is existing 
     const ticketExists = db.query.tickets.findFirst({
