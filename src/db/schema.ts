@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
-  pgTable,
+pgTable,
   uuid,
   varchar,
   text,
@@ -102,3 +102,10 @@ export const ticketCommentsRelations = relations(ticketComments, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+// type exports 
+export type User = typeof users.$inferSelect;
+export type UserRole = User['role'];
+
+export type Ticket = typeof tickets.$inferSelect;
+export type TicketComment = typeof ticketComments.$inferSelect;

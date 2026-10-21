@@ -5,7 +5,7 @@ import { eq, and } from "drizzle-orm";
 import { AppErr } from "../../shared/errors/app-error";
 
 
-export const createTicket = async (input: createTicketInput) => {
+export const createTicket = async (input: createTicketInput & { customerId: string }) => {
   // 1.need to validate the customer is there or not
   const customerExists = await db.query.users.findFirst({
     where: eq(users.id, input.customerId),

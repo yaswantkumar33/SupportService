@@ -5,7 +5,7 @@ import { createCommentInput } from "./comments.schema";
 import { tickets, ticketComments, users } from './../../db/schema';
 
 
-export const createComment = async (ticketId: string, data: createCommentInput) => {
+export const createComment = async (ticketId: string, data: createCommentInput & { authorId: string }) => {
 
     // check if the ticket is existing 
     const ticketExists = db.query.tickets.findFirst({
@@ -18,9 +18,6 @@ export const createComment = async (ticketId: string, data: createCommentInput) 
         where: eq(users.id, data.authorId)
     })
     if (!userExists) throw new AppErr("Author Not Found!", 404)
-
-    console.log("all errors are passed");
-
 
     const [newComment] = await db.insert(ticketComments).values({
         ticketId, authorId: data.authorId, content: data.content

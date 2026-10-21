@@ -22,7 +22,6 @@ export const loginHandeler = async (req: Request, res: Response, next: NextFunct
     try {
         const validatedData = loginSchema.parse(req.body)
         const result = await authService.loginUser(validatedData)
-        console.log(result);
 
         res.status(200).json({
             success: true,
