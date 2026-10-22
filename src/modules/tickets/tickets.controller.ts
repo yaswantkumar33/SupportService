@@ -19,15 +19,45 @@ export const createTicketHandeler = async (req: Request, res: Response, next: Ne
 
 
 export const getTicketsHandeler = async (req: Request, res: Response, next: NextFunction) => {
+
   try {
 
     const query = getTicketsQuerySchema.parse(req.query);
-    const ticketsList = await ticketService.getAllTicket(query);
-    res.status(200).json({ success: true, data: ticketsList });
+
+    const { meta, data } = await ticketService.getAllTicket({ user: req.user!, query });
+
+    res.status(200).json({
+      success: true,
+      message: "Tickets retrived successfully",
+      data,
+      meta
+    });
+
   } catch (e: any) {
+
     next(e);
+
   }
 };
+
+export const getTicketByIdHandeler = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
+
+  try {
+
+    const { id } = req.params;
+
+    const ticket = await ticketService.getTicketById(id, req.user!);
+    console.log(ticket);
+
+    res.status(200).json({
+      success: true,
+      message: "Ticket details retrieved successfully",
+      data: ticket
+    })
+
+  } catch (e) { next(e) }
+
+}
 
 
 export const updateTicketHandeler = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {

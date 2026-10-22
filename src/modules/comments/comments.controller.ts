@@ -7,16 +7,19 @@ export const createCommentHandeler = async (req: Request<{ id: string }>, res: R
 
 
     try {
+
         const ticketId = req.params.id;
+
         const validatedData = createCommentSchema.parse(req.body);
-        const authorId = req.user!.userId;
-        const newComment = await commentService.createComment(ticketId, { authorId, content: validatedData.content })
+
+        const newComment = await commentService.createComment({ ticketId, authorId: req.user!.userId, userRole: req.user!.userRole, content: validatedData.content })
 
         res.status(200).json({
             sucess: true,
             message: "Comment Added Successfully",
             data: newComment
         })
+
     } catch (e) { next(e) }
 
 }
