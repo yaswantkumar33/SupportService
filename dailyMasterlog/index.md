@@ -95,7 +95,7 @@
   - Built `loginUser` service validating credentials via `bcrypt.compare` and issuing signed JWTs containing `userId` and `userRole` claims.
   - Exposed `POST /api/auth/register` and `POST /api/auth/login` endpoints in `auth.router.ts`.
 
-  ## 7. Middleware Security & Role-Based Access Control (Oct 21, 2026)
+## 7. Middleware Security & Role-Based Access Control (Oct 21, 2026)
 
 - **Express Type Declaration (`src/types/express.d.ts`):** Extended `Express.Request` type definition to recognize `req.user` containing `userId` and `userRole`.
 - **Authentication Middleware (`src/shared/middlewares/auth.middleware.ts`):**
@@ -108,3 +108,13 @@
   - Built `requireRole` middleware factory checking `req.user.userRole` against permitted route roles.
   - Enforced `requireRole('agent', 'admin')` on `PATCH /api/tickets/:id`.
   - Enforced `requireRole('admin')` on `DELETE /api/users/:id`.
+
+## 8. Query Validation, Pagination, and Resource Authorization (Oct 22, 2026)
+- **Resource Ownership Scoping:**
+  - Enforced customer isolation across `GET /api/tickets` and `GET /api/tickets/:id`.
+  - Populated relation graphs for `customer` and `assignedAgent`.
+- **Paginated List Metadata:**
+  - Implemented dynamic Drizzle SQL expression arrays (`SQL[]`) with safety filters.
+  - Added concurrent total count execution via `count()` to supply client-friendly pagination metadata (`totalCount`, `totalPages`, `hasNextPage`, etc.).
+- **Comment Access Control:**
+  - Hardened `POST /api/tickets/:id/comments` to block unauthorized users from posting comments on arbitrary ticket IDs.
