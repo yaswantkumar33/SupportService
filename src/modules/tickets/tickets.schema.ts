@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TicketStatus } from "../../db/schema";
 
 export const createTicketSchema = z.object({
   title: z.string().min(3, "Min 3 characters required!"),
@@ -13,6 +14,14 @@ export const updateTicketSchema = z.object({
   priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
   assignedAgentId: z.string().min(3).optional(),
 });
+
+// allowed status transition 
+export const ALLOWED_STATUS_TRANSITIONS: Record<TicketStatus, TicketStatus[]> = {
+  open: ['in_progress', 'closed'],
+  in_progress: ['resolved', 'closed'],
+  resolved: ['in_progress', 'closed'],
+  closed: ['open']
+}
 
 export const getTicketsQuerySchema = z.object({
   status: z.enum(["open", "in_progress", "resolved", "closed"]).optional(),
