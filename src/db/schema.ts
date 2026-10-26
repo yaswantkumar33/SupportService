@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
-pgTable,
+  pgTable,
   uuid,
   varchar,
   text,
@@ -108,4 +108,5 @@ export type User = typeof users.$inferSelect;
 export type UserRole = User['role'];
 
 export type Ticket = typeof tickets.$inferSelect;
+export type TicketStatus = (typeof statusEnum.enumValues)[number];
 export type TicketComment = typeof ticketComments.$inferSelect;

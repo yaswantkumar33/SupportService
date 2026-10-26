@@ -110,6 +110,7 @@
   - Enforced `requireRole('admin')` on `DELETE /api/users/:id`.
 
 ## 8. Query Validation, Pagination, and Resource Authorization (Oct 22, 2026)
+
 - **Resource Ownership Scoping:**
   - Enforced customer isolation across `GET /api/tickets` and `GET /api/tickets/:id`.
   - Populated relation graphs for `customer` and `assignedAgent`.
@@ -118,3 +119,12 @@
   - Added concurrent total count execution via `count()` to supply client-friendly pagination metadata (`totalCount`, `totalPages`, `hasNextPage`, etc.).
 - **Comment Access Control:**
   - Hardened `POST /api/tickets/:id/comments` to block unauthorized users from posting comments on arbitrary ticket IDs.
+
+## 9. Ticket Lifecycle & State Transition Enforcement (Oct 26, 2026)
+
+- **Lifecycle Transition Map (`src/modules/tickets/tickets.schema.ts`):**
+  - Defined declarative `ALLOWED_STATUS_TRANSITIONS` map (`open` -> `in_progress` / `closed`, `in_progress` -> `resolved` / `closed`, `resolved` -> `in_progress` / `closed`).
+  - Added strict status transition checks in service layer with clear `400 Bad Request` messages on invalid transitions.
+- **Role-Based Update Scoping (`src/modules/tickets/tickets.service.ts`):**
+  - Restricted reopening of `closed` tickets to `admin` roles only.
+  - Enforced agent assignment checks ensuring non-admin agents can only modify tickets explicitly assigned to their user identity.

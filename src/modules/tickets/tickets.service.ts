@@ -1,6 +1,6 @@
 import { db } from "../../db";
 import { tickets, UserRole, users } from "../../db/schema";
-import { createTicketInput, getTicketsQueryInput, updateTicketInput } from "./tickets.schema";
+import { ALLOWED_STATUS_TRANSITIONS, createTicketInput, getTicketsQueryInput, updateTicketInput } from "./tickets.schema";
 import { eq, and, desc, SQL, count } from "drizzle-orm";
 import { AppErr } from "../../shared/errors/app-error";
 
@@ -13,6 +13,15 @@ interface GetAllTicketParams {
     userRole: UserRole;
   };
   query: getTicketsQueryInput
+}
+
+interface updateTicketParams {
+  ticketId: string;
+  input: updateTicketInput;
+  user: {
+    userId: string;
+    userRole: UserRole;
+  };
 }
 // create ticket 
 export const createTicket = async (input: createTicketInput & { customerId: string }) => {
@@ -31,21 +40,26 @@ export const createTicket = async (input: createTicketInput & { customerId: stri
 };
 
 // update ticket 
-export const updateTicket = async (ticketId: string, input: updateTicketInput) => {
+export const updateTicket = async ({ ticketId, input, user }: updateTicketParams) => {
 
   const ticketExists = await db.query.tickets.findFirst({
     where: eq(tickets.id, ticketId)
   })
 
-  if (!ticketExists) throw new AppErr("Ticket Not Found!!");
-  if (input.assignedAgentId) {
-    const agentUser = await db.query.users.findFirst({
-      where: eq(users.id, input.assignedAgentId)
-    })
+  if (!ticketExists) throw new AppErr("Ticket Not Found!!", 404);
 
-    if (!agentUser) throw new AppErr("Assigned agent does not exist", 400);
-    if (agentUser.role === "customer") throw new AppErr("Cannot assign ticket to the user with role as customer!", 400)
+
+  if (input.status && input.status !== ticketExists.status) {
+
+    const currentStatus = ticketExists.status;
+    const allowedNextStatus = ALLOWED_STATUS_TRANSITIONS[currentStatus];
+
+    if (currentStatus == 'closed' && user.userRole !== 'admin') throw new AppErr('Forbidden: Only admins can re open closed tickets', 403);
+
+    if (!allowedNextStatus.includes(input.status)) throw new AppErr(`Invalid status transition from ${currentStatus} to ${input.status}`, 400)
   }
+
+  if (user.userRole === 'agent' && ticketExists.assignedAgentId !== user.userId) throw new AppErr('Forbidden: You can only update tickets that are assigned to you', 403)
 
   const [updatedTicket] = await db
     .update(tickets)

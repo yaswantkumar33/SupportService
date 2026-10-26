@@ -63,11 +63,12 @@ export const getTicketByIdHandeler = async (req: Request<{ id: string }>, res: R
 export const updateTicketHandeler = async (req: Request<{ id: string }>, res: Response, next: NextFunction) => {
 
   try {
-    const { id } = req.params;
+    const { id: ticketId } = req.params;
     const validatedReqData = updateTicketSchema.parse(req.body);
-    const updatedTicket = await ticketService.updateTicket(id, validatedReqData);
+    const updatedTicket = await ticketService.updateTicket({ ticketId, input: validatedReqData, user: req.user! });
     res.status(200).json({
       success: true,
+      message: 'Ticket updated successfully',
       data: updatedTicket
     })
 
