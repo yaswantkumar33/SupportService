@@ -1,3 +1,6 @@
+<img width="1024" height="338" alt="image" src="https://github.com/user-attachments/assets/009bd164-7523-4999-935a-9dc37c7ecbc9" />
+
+
 # SupportService API
 
 A production-grade, modular monolith RESTful backend for ticket and customer support management built with Node.js, Express, TypeScript, PostgreSQL, and Drizzle ORM.
