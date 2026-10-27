@@ -4,6 +4,7 @@ import { createCommentHandeler, getTicketCommentsHandeler } from "../comments/co
 import { authenticate } from "../../shared/middlewares/auth.middleware";
 import { requiredRole } from "../../shared/middlewares/role.middleware";
 import { getTicketById } from "./tickets.service";
+import { getTicketAuditHandeler } from "../audit-logs/audit-logs.controller";
 
 const router = Router();
 
@@ -15,8 +16,11 @@ router.post("/", createTicketHandeler);
 router.get("/", getTicketsHandeler);
 router.get("/:id", getTicketByIdHandeler);
 router.patch("/:id", requiredRole('agent', 'admin'), updateTicketHandeler);
+
 // ticket comments 
 router.get("/:id/comments", getTicketCommentsHandeler);
 router.post("/:id/comments", createCommentHandeler);
+
+router.get("/:id/audit-logs", getTicketAuditHandeler)
 
 export default router;
