@@ -129,7 +129,7 @@
   - Restricted reopening of `closed` tickets to `admin` roles only.
   - Enforced agent assignment checks ensuring non-admin agents can only modify tickets explicitly assigned to their user identity.
 
-## 10. Audit Logging, Activity Tracking & Attachments Schema (Oct 27, 2026)
+## 10. Audit Logging & Activity Tracking System (Oct 27, 2026)
 
 - **Audit Logging System (`src/modules/audit-logs/`):**
   - Created `audit_logs` table storing JSON diffs of modified fields (`oldValues`, `newValues`).
@@ -137,5 +137,3 @@
 - **Audit Activity Trail Endpoint:**
   - Added `GET /api/tickets/:id/audit-logs` returning ordered activity logs with performer metadata (`id`, `name`, `email`, `role`).
   - Scoped access to ticket owners (`customer`), assigned agents, and global admins.
-- **File Attachments Schema (`src/db/schema.ts`):**
-  - Added `ticket_attachments` table to store metadata for future file uploads.
