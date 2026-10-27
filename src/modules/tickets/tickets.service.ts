@@ -3,10 +3,10 @@ import { tickets, UserRole, users } from "../../db/schema";
 import { ALLOWED_STATUS_TRANSITIONS, createTicketInput, getTicketsQueryInput, updateTicketInput } from "./tickets.schema";
 import { eq, and, desc, SQL, count } from "drizzle-orm";
 import { AppErr } from "../../shared/errors/app-error";
+import { createAuditLog } from "../audit-logs/audit-logs.service";
 
 
 // types 
-
 interface GetAllTicketParams {
   user: {
     userId: string;
@@ -14,7 +14,6 @@ interface GetAllTicketParams {
   };
   query: getTicketsQueryInput
 }
-
 interface updateTicketParams {
   ticketId: string;
   input: updateTicketInput;
@@ -23,6 +22,9 @@ interface updateTicketParams {
     userRole: UserRole;
   };
 }
+
+
+
 // create ticket 
 export const createTicket = async (input: createTicketInput & { customerId: string }) => {
   // 1.need to validate the customer is there or not
@@ -61,6 +63,29 @@ export const updateTicket = async ({ ticketId, input, user }: updateTicketParams
 
   if (user.userRole === 'agent' && ticketExists.assignedAgentId !== user.userId) throw new AppErr('Forbidden: You can only update tickets that are assigned to you', 403)
 
+  // audit logging 
+  const oldValues: Record<string, unknown> = {};
+  const newValues: Record<string, unknown> = {};
+  let action = 'TICKET UPDATE';
+
+  if (input.status && input.status !== ticketExists.status) {
+    action = "STATUS_UPDATE";
+    oldValues.status = ticketExists.status;
+    newValues.status = input.status;
+  }
+
+  if (input.assignedAgentId && input.assignedAgentId !== ticketExists.assignedAgentId) {
+    action = action === 'STATUS_UPDATE' ? 'STATUS_UPDATE_AND_ASSIGNMENT_UPDATE' : 'AGENT_ASSIGNMENT';
+    oldValues.assignedAgentId = ticketExists.assignedAgentId;
+    newValues.assignedAgentId = input.assignedAgentId;
+  }
+
+  if (input.priority && input.priority !== ticketExists.priority) {
+    oldValues.priority = ticketExists.priority;
+    newValues.priority = input.priority;
+  }
+
+  // update query  
   const [updatedTicket] = await db
     .update(tickets)
     .set({
@@ -69,6 +94,17 @@ export const updateTicket = async ({ ticketId, input, user }: updateTicketParams
     })
     .where(eq(tickets.id, ticketId))
     .returning();
+
+
+  if (Object.keys(newValues).length > 0) {
+    await createAuditLog({
+      ticketId,
+      performedById: user.userId,
+      action,
+      oldValues,
+      newValues
+    })
+  }
   return updatedTicket;
 }
 

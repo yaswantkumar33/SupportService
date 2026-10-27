@@ -1,4 +1,5 @@
 import { relations } from "drizzle-orm";
+import { jsonb } from "drizzle-orm/pg-core";
 import {
   pgTable,
   uuid,
@@ -72,6 +73,20 @@ export const ticketComments = pgTable("ticket_comments", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+// Audit Logs Table 
+
+export const auditLogs = pgTable('audit_logs', {
+  id: uuid("id").primaryKey().defaultRandom(),
+  ticketId: uuid('ticket_id').notNull().references(() => tickets.id, { onDelete: 'cascade' }),
+  performedById: uuid('performed_by_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  action: varchar('action', { length: 100 }).notNull(),
+  oldValues: jsonb('old_values'),
+  newValues: jsonb('new_values'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  index('idx_audit_logs_ticket_id').on(table.ticketId),
+  index('idx_audit_logs_performed_by').on(table.performedById),
+])
 
 // declaring the drizzlee relationships here at the schema
 export const userRelations = relations(users, ({ many }) => ({
@@ -79,7 +94,7 @@ export const userRelations = relations(users, ({ many }) => ({
   assignedTickets: many(tickets, { relationName: "agentTickets" }),
 }));
 
-export const ticketRealtions = relations(tickets, ({ one }) => ({
+export const ticketRealtions = relations(tickets, ({ one, many }) => ({
   customer: one(users, {
     fields: [tickets.customerId],
     references: [users.id],
@@ -90,6 +105,7 @@ export const ticketRealtions = relations(tickets, ({ one }) => ({
     references: [users.id],
     relationName: "agentTickets",
   }),
+  auditLogs: many(auditLogs)
 }));
 
 export const ticketCommentsRelations = relations(ticketComments, ({ one }) => ({
@@ -103,6 +119,17 @@ export const ticketCommentsRelations = relations(ticketComments, ({ one }) => ({
   }),
 }));
 
+export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
+  ticket: one(tickets, {
+    fields: [auditLogs.ticketId],
+    references: [tickets.id]
+  }),
+  performedBy: one(users, {
+    fields: [auditLogs.performedById],
+    references: [users.id]
+  })
+}))
+
 // type exports 
 export type User = typeof users.$inferSelect;
 export type UserRole = User['role'];
@@ -110,3 +137,5 @@ export type UserRole = User['role'];
 export type Ticket = typeof tickets.$inferSelect;
 export type TicketStatus = (typeof statusEnum.enumValues)[number];
 export type TicketComment = typeof ticketComments.$inferSelect;
+
+export type AuditLog = typeof auditLogs.$inferSelect;
