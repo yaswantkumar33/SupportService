@@ -1,4 +1,5 @@
 import { relations } from "drizzle-orm";
+import { integer } from "drizzle-orm/pg-core";
 import { jsonb } from "drizzle-orm/pg-core";
 import {
   pgTable,
@@ -9,7 +10,8 @@ import {
   pgEnum,
   index,
 } from "drizzle-orm/pg-core";
-// Enuma we are used in users and tickets db
+
+// Enum we are used in users and tickets db
 export const roleEnum = pgEnum("role", ["customer", "agent", "admin"]);
 export const statusEnum = pgEnum("status", [
   "open",
@@ -23,6 +25,7 @@ export const priorityEnum = pgEnum("priority", [
   "high",
   "urgent",
 ]);
+
 
 // Tables
 // Users Table
@@ -74,7 +77,6 @@ export const ticketComments = pgTable("ticket_comments", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 // Audit Logs Table 
-
 export const auditLogs = pgTable('audit_logs', {
   id: uuid("id").primaryKey().defaultRandom(),
   ticketId: uuid('ticket_id').notNull().references(() => tickets.id, { onDelete: 'cascade' }),
@@ -86,6 +88,19 @@ export const auditLogs = pgTable('audit_logs', {
 }, (table) => [
   index('idx_audit_logs_ticket_id').on(table.ticketId),
   index('idx_audit_logs_performed_by').on(table.performedById),
+])
+// Ticket Attachements Table 
+export const ticketAttachements = pgTable('ticket_attachments', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  ticketId: uuid('ticket_id').notNull().references(() => tickets.id, { onDelete: 'cascade' }),
+  uploadedById: uuid('uploaded_by_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  filename: varchar('filename', { length: 225 }).notNull(),
+  fileUrl: text('file_url').notNull(),
+  mimeType: varchar('mime_type', { length: 100 }).notNull(),
+  fileSize: integer('file_size').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull()
+}, (table) => [
+  index('idx_attachements_ticket_id').on(table.ticketId)
 ])
 
 // declaring the drizzlee relationships here at the schema
@@ -105,7 +120,8 @@ export const ticketRealtions = relations(tickets, ({ one, many }) => ({
     references: [users.id],
     relationName: "agentTickets",
   }),
-  auditLogs: many(auditLogs)
+  auditLogs: many(auditLogs),
+  ticketAttachements: many(ticketAttachements)
 }));
 
 export const ticketCommentsRelations = relations(ticketComments, ({ one }) => ({
@@ -118,6 +134,17 @@ export const ticketCommentsRelations = relations(ticketComments, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export const ticketAttachementsRelations = relations(ticketAttachements, ({ one }) => ({
+  ticket: one(tickets, {
+    fields: [ticketAttachements.ticketId],
+    references: [tickets.id]
+  }),
+  uploadedBy: one(users, {
+    fields: [ticketAttachements.uploadedById],
+    references: [users.id]
+  })
+}))
 
 export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
   ticket: one(tickets, {
@@ -137,5 +164,6 @@ export type UserRole = User['role'];
 export type Ticket = typeof tickets.$inferSelect;
 export type TicketStatus = (typeof statusEnum.enumValues)[number];
 export type TicketComment = typeof ticketComments.$inferSelect;
+export type ticketAttachement = typeof ticketAttachements.$inferSelect
 
 export type AuditLog = typeof auditLogs.$inferSelect;

@@ -137,3 +137,13 @@
 - **Audit Activity Trail Endpoint:**
   - Added `GET /api/tickets/:id/audit-logs` returning ordered activity logs with performer metadata (`id`, `name`, `email`, `role`).
   - Scoped access to ticket owners (`customer`), assigned agents, and global admins.
+
+## 11. Ticket File Attachments & Multer Storage (Oct 29, 2026)
+
+- **Attachment Schema & Relations (`src/db/schema.ts`):**
+  - Created `ticket_attachments` table mapped to tickets and uploading users.
+- **File Upload Middleware (`src/shared/middlewares/upload.middleware.ts`):**
+  - Configured Multer disk storage and filename generation.
+  - Implemented standard MIME type allowlist and 5MB payload ceiling.
+- **Attachment Endpoints (`src/modules/attachments/`):**
+  - Added upload (`POST /api/tickets/:id/attachments`) and listing (`GET /api/tickets/:id/attachments`) routes with role-based scoping.
