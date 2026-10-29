@@ -3,8 +3,9 @@ import { createTicketHandeler, getTicketByIdHandeler, getTicketsHandeler, update
 import { createCommentHandeler, getTicketCommentsHandeler } from "../comments/comments.controller";
 import { authenticate } from "../../shared/middlewares/auth.middleware";
 import { requiredRole } from "../../shared/middlewares/role.middleware";
-import { getTicketById } from "./tickets.service";
 import { getTicketAuditHandeler } from "../audit-logs/audit-logs.controller";
+import { getTicketAttachmentsHandeler, uploadAttachmentHandeler } from "../attachments/attachments.controller";
+import { uploadAttachement } from "../../shared/middlewares/upload.middleware";
 
 const router = Router();
 
@@ -21,6 +22,11 @@ router.patch("/:id", requiredRole('agent', 'admin'), updateTicketHandeler);
 router.get("/:id/comments", getTicketCommentsHandeler);
 router.post("/:id/comments", createCommentHandeler);
 
+//Tickets Attachments
+router.post('/:id/attachments', uploadAttachement.single('file'), uploadAttachmentHandeler)
+router.get('/:id/attachments', getTicketAttachmentsHandeler)
+
 router.get("/:id/audit-logs", getTicketAuditHandeler)
+
 
 export default router;
